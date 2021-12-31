@@ -13,8 +13,19 @@ import (
 var CONFIG_PATH = "/config"
 
 func main() {
+	if cfgPath := os.Getenv("CONFIGURATOR_PATH"); cfgPath != "" {
+		CONFIG_PATH = cfgPath
+	}
 	var cfg string
-	if b64cfg := os.Getenv("CONFIGURATOR_B64"); b64cfg != "" {
+	if o, err := os.Stat(CONFIG_PATH); err == nil {
+		f, err := os.Open(o.Name())
+		if err != nil {
+			log.Fatal(err)
+		}
+		if cfg, err = Render(bufio.NewScanner(f)); err != nil {
+			log.Fatal(err)
+		}
+	} else if b64cfg := os.Getenv("CONFIGURATOR_B64"); b64cfg != "" {
 		decoded, err := base64.StdEncoding.DecodeString(b64cfg)
 		if err != nil {
 			log.Fatal(err)
@@ -30,9 +41,6 @@ func main() {
 		}
 	} else {
 		log.Fatal("No configuration specified...")
-	}
-	if cfgPath := os.Getenv("CONFIGURATOR_PATH"); cfgPath != "" {
-		CONFIG_PATH = cfgPath
 	}
 	if err := os.WriteFile(CONFIG_PATH, []byte(cfg), os.ModePerm); err != nil {
 		log.Fatal(err)
