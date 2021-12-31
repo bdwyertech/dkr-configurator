@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"strings"
 
 	log "github.com/sirupsen/logrus"
@@ -11,7 +12,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/ssm"
 	ssmTypes "github.com/aws/aws-sdk-go-v2/service/ssm/types"
-	"github.com/ghodss/yaml"
+	"gopkg.in/yaml.v3"
 )
 
 func awsConfig() aws.Config {
@@ -81,7 +82,14 @@ func GetParametersByPathJSON(path string) (jsonBytes []byte) {
 
 func GetParametersByPathYAML(path string) (ymlBytes []byte) {
 	jsonBytes := GetParametersByPathJSON(path)
-	ymlBytes, err := yaml.JSONToYAML(jsonBytes)
+	var jsonObj interface{}
+
+	err := json.Unmarshal(jsonBytes, &jsonObj)
+	if err != nil {
+		log.Fatalf("ERROR: JSONtoYAML\n%s", err)
+	}
+
+	ymlBytes, err = yaml.Marshal(jsonObj)
 	if err != nil {
 		log.Fatalf("ERROR: JSONtoYAML\n%s", err)
 	}

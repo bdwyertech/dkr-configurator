@@ -17,15 +17,7 @@ func main() {
 		CONFIG_PATH = cfgPath
 	}
 	var cfg string
-	if o, err := os.Stat(CONFIG_PATH); err == nil {
-		f, err := os.Open(o.Name())
-		if err != nil {
-			log.Fatal(err)
-		}
-		if cfg, err = Render(bufio.NewScanner(f)); err != nil {
-			log.Fatal(err)
-		}
-	} else if b64cfg := os.Getenv("CONFIGURATOR_B64"); b64cfg != "" {
+	if b64cfg := os.Getenv("CONFIGURATOR_B64"); b64cfg != "" {
 		decoded, err := base64.StdEncoding.DecodeString(b64cfg)
 		if err != nil {
 			log.Fatal(err)
@@ -38,6 +30,10 @@ func main() {
 			cfg = string(GetParametersByPathJSON(ssmPath))
 		} else {
 			cfg = string(GetParametersByPathYAML(ssmPath))
+		}
+	} else if f, err := os.Open(CONFIG_PATH); err == nil {
+		if cfg, err = Render(bufio.NewScanner(f)); err != nil {
+			log.Fatal(err)
 		}
 	} else {
 		log.Fatal("No configuration specified...")
