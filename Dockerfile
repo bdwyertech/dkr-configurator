@@ -3,7 +3,7 @@ WORKDIR /go/src/
 COPY . .
 RUN CGO_ENABLED=0 GOFLAGS=-mod=vendor go build -ldflags="-s -w" -trimpath .
 
-FROM gcr.io/distroless/static:nonroot-amd64
+FROM gcr.io/distroless/static:latest-amd64
 
 ARG BUILD_DATE
 ARG VCS_REF
