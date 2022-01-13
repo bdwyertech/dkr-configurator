@@ -12,6 +12,17 @@ import (
 
 var CONFIG_PATH = "/config"
 
+func init() {
+	log.SetFormatter(&log.JSONFormatter{PrettyPrint: true})
+	if os.Getenv("CONFIGURATOR_DEBUG") != "" {
+		log.SetLevel(log.DebugLevel)
+	}
+	if os.Getenv("CONFIGURATOR_TRACE") != "" {
+		log.SetLevel(log.TraceLevel)
+		log.SetReportCaller(true)
+	}
+}
+
 func main() {
 	if cfgPath := os.Getenv("CONFIGURATOR_PATH"); cfgPath != "" {
 		CONFIG_PATH = cfgPath
@@ -41,6 +52,8 @@ func main() {
 	if err := os.WriteFile(CONFIG_PATH, []byte(cfg), os.ModePerm); err != nil {
 		log.Fatal(err)
 	}
+
+	log.Debug(cfg)
 
 	uid, gid := os.Getenv("CONFIGURATOR_UID"), os.Getenv("CONFIGURATOR_GID")
 	if uid != "" || gid != "" {
