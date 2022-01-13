@@ -15,7 +15,7 @@ import (
 const UNABLE_TO_RENDER_PREFIX = "#|-+-SSM2CFG-UNABLE-TO-RENDER-+-|#"
 
 func Render(scanner *bufio.Scanner) (rendered string, errors error) {
-	re := regexp.MustCompile(`\$\{.*:::.*\}`)
+	re := regexp.MustCompile(`\$\{.*:::.*:::\}`)
 	var replacer func(string) string
 	replacer = func(s string) string {
 		// Cascade nested rendering failure
@@ -23,7 +23,7 @@ func Render(scanner *bufio.Scanner) (rendered string, errors error) {
 			return s
 		}
 		s = strings.TrimPrefix(s, "${")
-		s = strings.TrimSuffix(s, "}")
+		s = strings.TrimSuffix(s, ":::}")
 		for {
 			//
 			// Recursively loop through nested variables
@@ -43,10 +43,11 @@ func Render(scanner *bufio.Scanner) (rendered string, errors error) {
 			//
 			// Environment Variable
 			//
-			if val, ok := os.LookupEnv(strings.TrimPrefix(s, pfx)); ok {
+			env := strings.TrimPrefix(s, pfx)
+			if val, ok := os.LookupEnv(env); ok {
 				return val
 			} else {
-				log.Warnln("Unable to locate environment variable:", s)
+				log.Warnln("Unable to locate environment variable:", env)
 			}
 		} else if pfx := "ssm:::"; strings.HasPrefix(s, pfx) {
 			//
