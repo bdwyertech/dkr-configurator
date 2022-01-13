@@ -13,7 +13,7 @@ import (
 var CONFIG_PATH = "/config"
 
 func init() {
-	log.SetFormatter(&log.JSONFormatter{PrettyPrint: true})
+	log.SetFormatter(&log.JSONFormatter{})
 	if os.Getenv("CONFIGURATOR_DEBUG") != "" {
 		log.SetLevel(log.DebugLevel)
 	}
